@@ -198,7 +198,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
 
     @objc func makeOpaque(){
         self.webView?.isOpaque = false
-        self.webView?.backgroundColor = UIColor.clear
+        self.webView?.backgroundColor = UIColor.black
     }
 
     @objc func boolToNumberString(bool: Bool) -> String{
@@ -248,7 +248,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
 
     @objc func pageDidLoad() {
         self.webView?.isOpaque = false
-        self.webView?.backgroundColor = UIColor.clear
+        self.webView?.backgroundColor = UIColor.black
     }
 
     // ---- BEGIN EXTERNAL API ----
@@ -468,7 +468,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
 
     @objc func openSettings(_ command: CDVInvokedUrlCommand) {
         if #available(iOS 10.0, *) {
-            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+            guard let settingsUrl = URL(string: UIApplicationOpenSettingsURLString) else {
             return
         }
         if UIApplication.shared.canOpenURL(settingsUrl) {
@@ -481,11 +481,50 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
         } else {
             // pre iOS 10.0
             if #available(iOS 8.0, *) {
-                UIApplication.shared.openURL(NSURL(string: UIApplication.openSettingsURLString)! as URL)
+                UIApplication.shared.openURL(NSURL(string: UIApplicationOpenSettingsURLString)! as URL)
                 self.getStatus(command)
             } else {
                 self.sendErrorCode(command: command, error: QRScannerError.open_settings_unavailable)
             }
+        }
+    }
+
+    @objc func vibrate(_ command: CDVInvokedUrlCommand) {
+        let fStyle = command.arguments[0] as! String
+        switch fStyle {
+        case "light":
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            break
+        case "medium":
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            break
+        case "heavy":
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            break
+        case "soft":
+            if #available(iOS 13.0, *) {
+                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+            } else {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            }
+            break
+        case "rigid":
+            if #available(iOS 13.0, *) {
+                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            } else {
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            }
+            break
+        case "success":
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            break
+        case "warning":
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            break
+        case "error":
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            break
+        default: break
         }
     }
 }
